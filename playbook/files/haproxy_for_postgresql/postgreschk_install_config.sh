@@ -17,7 +17,7 @@ cp postgreschk /usr/local/bin/
 chown nobody: /usr/local/bin/postgreschk
 chmod 744 /usr/local/bin/postgreschk
 touch /opt/.pgpass
-echo "localhost:5432:postgres:${user}:${user}" >> /opt/.pgpass
+echo "localhost:5432:postgres:${user}:${pass}" >> /opt/.pgpass
 chown nobody: /opt/.pgpass
 chmod 0600 /opt/.pgpass
 
