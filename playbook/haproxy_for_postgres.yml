@@ -1,0 +1,31 @@
+---
+- name: Haproxy Standalone Installation
+  hosts: all
+  tasks:
+     - name: Transfering Haproxy install script
+       copy: src=haproxy_for_postgresql/haproxy_install.sh dest=/tmp mode=0777
+
+     - name: Transfering Haproxy Configuration script
+       copy: src=haproxy_for_postgresql/haproxy_config.sh dest=/tmp mode=0777
+
+     - name: Executing Haproxy Instalation script
+       command: "sh /tmp/haproxy_install.sh"
+       register: cmd_install
+     - debug: msg="{{ cmd_install.stdout_lines|replace('\\t',' ') }}"
+     - debug: msg="{{ cmd_install.stderr_lines|replace('\\t',' ') }}"
+
+     - name: Executing Haproxy Configuration script
+       command: "sh /tmp/haproxy_config.sh {{ pg_port }} {{ pg_primary_server }} {{ pg_backup_servers }}"
+       register: cmd_config
+     - debug: msg="{{ cmd_config.stdout_lines|replace('\\t',' ') }}"
+     - debug: msg="{{ cmd_config.stderr_lines|replace('\\t',' ') }}"
+
+     - name: Removing - Haproxy install script
+       file:
+         path: /tmp/haproxy_install.sh
+         state: absent
+
+     - name: Removing - Haproxy config script
+       file:
+         path: /tmp/haproxy_config.sh
+         state: absent

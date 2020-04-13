@@ -1,0 +1,89 @@
+#!/bin/bash
+#
+# This script checks if a PostgreSQL server is healthy running on localhost. It will
+# return:
+# "HTTP/1.x 200 OK\r" (if postgres is running smoothly)
+# - OR -
+# "HTTP/1.x 500 Internal Server Error\r" (else)
+#
+# The purpose of this script is make haproxy capable of monitoring PostgreSQL properly
+#
+
+# Password file for PostgreSQL
+CREDENTIALS_FILE="/opt/.pgpass"
+PSQL_BIN=$(which psql)
+export PGCONNECT_TIMEOUT=10
+
+FORCE_FAIL="/dev/shm/proxyoff"
+SLAVE_CHECK="SELECT pg_is_in_recovery()"
+WRITABLE_CHECK="SHOW transaction_read_only"
+OPT_HTTP_STATUS=1
+#
+# The HTTP response. This will return a HTTP response with the provided HTTP
+#   code and a descriptive message.
+# Example:
+#   http_response 301 "You accessed something that does not exist"
+#   http_response 200 { "status": "success" }
+#
+http_response () {
+    HTTP_CODE=$1
+    MESSAGE=${2:-Message Undefined}
+    length=${#MESSAGE}
+  if [ $OPT_HTTP_STATUS -eq 1 ]; then
+    if [ "$HTTP_CODE" -eq 503 ]; then
+      echo -en "HTTP/1.1 503 Service Unavailable\r\n"
+    elif [ "$HTTP_CODE" -eq 301 ]; then
+      echo -en "HTTP/1.1 301 Not Found\r\n"
+    elif [ "$HTTP_CODE" -eq 200 ]; then
+      echo -en "HTTP/1.1 200 OK\r\n"
+    else
+      echo -en "HTTP/1.1 ${HTTP_CODE} UNKNOWN\r\n"
+    fi
+    echo -en "Content-Type: text/plain\r\n"
+    echo -en "Connection: close\r\n"
+    echo -en "Content-Length: ${length}\r\n"
+    echo -en "\r\n"
+    echo -en "$MESSAGE"
+    echo -en "\r\n"
+    sleep 0.1
+    exit 0
+  fi
+}
+
+return_ok()
+{
+    if [ "$1x" == "masterx" ]; then
+        http_response 200 "PostgreSQL master is running."
+    elif [ "$1x" == "slavex" ]; then
+        http_response 200  "PostgreSQL slave is running."
+    else
+        http_response 200  "PostgreSQL is running."
+    fi
+}
+
+return_fail()
+{
+    http_response 503 "PostgreSQL is *down*."
+}
+
+if [ -f "$FORCE_FAIL" ]; then
+    return_fail;
+fi
+
+# check if in recovery mode (that means it is a 'slave')
+SLAVE=$(${PSQL_BIN} --passfile=${CREDENTIALS_FILE} -qt -c "$SLAVE_CHECK" 2>/dev/null)
+if [ $? -ne 0 ]; then
+    return_fail;
+elif echo $SLAVE | egrep -i "(t|true|on|1)" 2>/dev/null >/dev/null; then
+    return_ok "slave"
+fi
+
+# check if writable (then we consider it as a 'master')
+READONLY=$(${PSQL_BIN} --passfile=${CREDENTIALS_FILE} -qt -c "$WRITABLE_CHECK" 2>/dev/null)
+if [ $? -ne 0 ]; then
+    return_fail;
+elif echo $READONLY | egrep -i "(f|false|off|0)" 2>/dev/null >/dev/null; then
+    return_ok "master"
+fi
+
+return_ok "none";

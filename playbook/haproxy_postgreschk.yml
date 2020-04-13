@@ -1,0 +1,25 @@
+---
+- name: Haproxy PostgreSQL Check Installation
+  hosts: all
+  tasks:
+     - name: Transfering Haproxy PostgreSQL Check (mysqlchk) install script
+       copy: src=haproxy_for_postgresql/postgreschk dest=/tmp mode=0777
+
+     - name: Transfering Haproxy PostgreSQL Check Configuration script
+       copy: src=haproxy_for_postgresql/postgreschk_install_config.sh dest=/tmp mode=0777
+
+     - name: Executing Haproxy PostgreSQL Check Configuration script
+       command: "sh /tmp/postgreschk_install_config.sh {{ mysql_user }} {{ mysql_password }}"
+       register: cmd_config
+     - debug: msg="{{ cmd_config.stdout_lines|replace('\\t',' ') }}"
+     - debug: msg="{{ cmd_config.stderr_lines|replace('\\t',' ') }}"
+
+     - name: Removing - postgreschk
+       file:
+         path: /tmp/postgreschk
+         state: absent
+
+     - name: Removing - Haproxy PostgreSQL Check script
+       file:
+         path: /tmp/postgreschk_install_config.sh
+         state: absent
