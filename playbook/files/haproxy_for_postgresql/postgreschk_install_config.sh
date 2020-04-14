@@ -10,42 +10,41 @@ yum -y install xinetd telnet
 
 user=${1}
 pass=${2}
+server_address=${3}
 
 ### copy from /tmp directory ###
 cd /tmp
 cp postgreschk /usr/local/bin/
 chown nobody: /usr/local/bin/postgreschk
 chmod 744 /usr/local/bin/postgreschk
-touch /opt/.pgpass
-echo "localhost:5432:postgres:${user}:${pass}" >> /opt/.pgpass
-chown nobody: /opt/.pgpass
-chmod 0600 /opt/.pgpass
+echo "$server_address:5432:postgres:${user}:${pass}" > /opt/.pgpass
+echo "${user}" > /opt/.pgpass
+echo "${server_address}" > /opt/.pgserver
+chown nobody: /opt/.pguser /opt/.pgpass /opt/.pgserver
+chmod 0400 /opt/.pguser /opt/.pgpass /opt/.pgserver
 
 ##### Add postgreschk in the last line ###########################
 # /etc/services
-echo ' ' >> /etc/services
-echo '# postgreschk preps' >> /etc/services
-echo 'postgreschk        9200/tcp                # postgreschk' >> /etc/services
+echo "# postgreschk preps
+postgreschk        9200/tcp                # postgreschk" >> /etc/services
 
-echo ' '                                               >  /etc/xinetd.d/postgreschk
-echo '# postgres'                                      >> /etc/xinetd.d/postgreschk
-echo '# default: on'                                   >> /etc/xinetd.d/postgreschk
-echo '# description: postgreschk'                      >> /etc/xinetd.d/postgreschk
-echo 'service postgres'                                >> /etc/xinetd.d/postgreschk
-echo '{ '                                              >> /etc/xinetd.d/postgreschk
-echo '  disable            = no'                       >> /etc/xinetd.d/postgreschk
-echo '  flags              = REUSE'                    >> /etc/xinetd.d/postgreschk
-echo '  socket_type        = stream'                   >> /etc/xinetd.d/postgreschk
-echo '  port               = 9200'                     >> /etc/xinetd.d/postgreschk
-echo '  wait               = no'                       >> /etc/xinetd.d/postgreschk
-echo '  user               = nobody'                   >> /etc/xinetd.d/postgreschk
-echo '  server             = /usr/local/bin/postgreschk'  >> /etc/xinetd.d/postgreschk
-echo '  log_on_failure     += USERID'                  >> /etc/xinetd.d/postgreschk
-echo '  log_on_success     ='                          >> /etc/xinetd.d/postgreschk
-echo '  only_from          = 0.0.0.0/0'                >> /etc/xinetd.d/postgreschk
-echo '  per_source         = UNLIMITED'                >> /etc/xinetd.d/postgreschk
-echo '}'                                               >> /etc/xinetd.d/postgreschk
-echo ' '                                               >> /etc/xinetd.d/postgreschk
+echo "# postgres
+# default: on
+# description: postgreschk
+service postgres
+{
+  disable            = no
+  flags              = REUSE
+  socket_type        = stream
+  port               = 9200
+  wait               = no
+  user               = nobody
+  server             = /usr/local/bin/postgreschk
+  log_on_failure     += USERID
+  log_on_success     =
+  only_from          = 0.0.0.0/0
+  per_source         = UNLIMITED
+}" >  /etc/xinetd.d/postgreschk
 
 ### starting xinetd service ###
 systemctl enable xinetd.service

@@ -9,7 +9,7 @@
        copy: src=haproxy_for_postgresql/postgreschk_install_config.sh dest=/tmp mode=0777
 
      - name: Executing Haproxy PostgreSQL Check Configuration script
-       command: "sh /tmp/postgreschk_install_config.sh {{ mysql_user }} {{ mysql_password }}"
+       command: "sh /tmp/postgreschk_install_config.sh {{ pg_user }} {{ pg_password }} {{ pg_server_address }}"
        register: cmd_config
      - debug: msg="{{ cmd_config.stdout_lines|replace('\\t',' ') }}"
      - debug: msg="{{ cmd_config.stderr_lines|replace('\\t',' ') }}"

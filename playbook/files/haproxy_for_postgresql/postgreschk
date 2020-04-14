@@ -11,7 +11,12 @@
 
 # Password file for PostgreSQL
 CREDENTIALS_FILE="/opt/.pgpass"
+PG_SERVER=$(cat /opt/.pgserver)
+PG_USERNAME=$(cat /opt/.pguser)
 PSQL_BIN=$(which psql)
+export PGHOST=${PG_SERVER}
+export PGUSER=${PG_USERNAME}
+export PGPASSFILE=${CREDENTIALS_FILE}
 export PGCONNECT_TIMEOUT=10
 
 FORCE_FAIL="/dev/shm/proxyoff"
@@ -71,7 +76,7 @@ if [ -f "$FORCE_FAIL" ]; then
 fi
 
 # check if in recovery mode (that means it is a 'slave')
-SLAVE=$(${PSQL_BIN} --passfile=${CREDENTIALS_FILE} -qt -c "$SLAVE_CHECK" 2>/dev/null)
+SLAVE=$(${PSQL_BIN} -qt -c "$SLAVE_CHECK" 2>/dev/null)
 if [ $? -ne 0 ]; then
     return_fail;
 elif echo $SLAVE | egrep -i "(t|true|on|1)" 2>/dev/null >/dev/null; then
@@ -79,7 +84,7 @@ elif echo $SLAVE | egrep -i "(t|true|on|1)" 2>/dev/null >/dev/null; then
 fi
 
 # check if writable (then we consider it as a 'master')
-READONLY=$(${PSQL_BIN} --passfile=${CREDENTIALS_FILE} -qt -c "$WRITABLE_CHECK" 2>/dev/null)
+READONLY=$(${PSQL_BIN} -qt -c "$WRITABLE_CHECK" 2>/dev/null)
 if [ $? -ne 0 ]; then
     return_fail;
 elif echo $READONLY | egrep -i "(f|false|off|0)" 2>/dev/null >/dev/null; then
