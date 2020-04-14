@@ -2,7 +2,7 @@
 - name: Haproxy PostgreSQL Check Installation
   hosts: all
   tasks:
-     - name: Transfering Haproxy PostgreSQL Check (mysqlchk) install script
+     - name: Transfering Haproxy PostgreSQL Check (postgreschk) install script
        copy: src=haproxy_for_postgresql/postgreschk dest=/tmp mode=0777
 
      - name: Transfering Haproxy PostgreSQL Check Configuration script
