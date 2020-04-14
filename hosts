@@ -8,6 +8,6 @@
 ## 10.25.1.56
 ## 10.25.1.57
 
-[galeracluster]
-db-intermidiate-01 ansible_ssh_host=172.16.122.154
-dbmysql57 ansible_ssh_host=172.16.122.146
+[dbservers]
+dbproxy  ansible_ssh_host=172.16.122.159
+dbpg11   ansible_ssh_host=172.16.122.160

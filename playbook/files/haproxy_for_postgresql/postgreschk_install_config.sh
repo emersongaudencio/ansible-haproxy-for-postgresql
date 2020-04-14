@@ -18,7 +18,7 @@ cp postgreschk /usr/local/bin/
 chown nobody: /usr/local/bin/postgreschk
 chmod 744 /usr/local/bin/postgreschk
 echo "$server_address:5432:postgres:${user}:${pass}" > /opt/.pgpass
-echo "${user}" > /opt/.pgpass
+echo "${user}" > /opt/.pguser
 echo "${server_address}" > /opt/.pgserver
 chown nobody: /opt/.pguser /opt/.pgpass /opt/.pgserver
 chmod 0400 /opt/.pguser /opt/.pgpass /opt/.pgserver
@@ -28,10 +28,10 @@ chmod 0400 /opt/.pguser /opt/.pgpass /opt/.pgserver
 echo "# postgreschk preps
 postgreschk        9200/tcp                # postgreschk" >> /etc/services
 
-echo "# postgres
+echo "# postgreschk
 # default: on
 # description: postgreschk
-service postgres
+service postgreschk
 {
   disable            = no
   flags              = REUSE
