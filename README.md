@@ -79,7 +79,7 @@
 
 ### Parameters specification:
 
-#### run_haproxy_for_mysql.sh
+#### run_haproxy_for_postgresql.sh
 Parameter  | Value           | Mandatory | Order
 ------------ | ------------- | ------------- | -------------
 host | dbproxy | Yes | 1
