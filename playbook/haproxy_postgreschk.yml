@@ -1,5 +1,6 @@
 ---
 - name: Haproxy PostgreSQL Check Installation
+  gather_facts: false
   hosts: all
   tasks:
      - name: Transfering Haproxy PostgreSQL Check (postgreschk) install script
