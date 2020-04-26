@@ -10,13 +10,14 @@
 #
 
 # Password file for PostgreSQL
-CREDENTIALS_FILE="/opt/.pgpass"
+PG_PWD=$(cat /opt/.pgpass)
 PG_SERVER=$(cat /opt/.pgserver)
 PG_USERNAME=$(cat /opt/.pguser)
 PSQL_BIN=$(which psql)
 export PGHOST=${PG_SERVER}
 export PGUSER=${PG_USERNAME}
-export PGPASSFILE=${CREDENTIALS_FILE}
+export PGPASSWORD=${PG_PWD}
+export PGDATABASE="postgres"
 export PGCONNECT_TIMEOUT=10
 
 FORCE_FAIL="/dev/shm/proxyoff"

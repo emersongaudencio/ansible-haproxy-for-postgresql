@@ -77,6 +77,11 @@
  sh run_haproxy_postgreschk.sh dbpg11 postgreschk YOURPASSWORD 172.16.122.160
  ```
 
+ e.g using socket:
+ ```
+ sh run_haproxy_postgreschk.sh dbpg11 postgreschk YOURPASSWORD /var/run/postgresql/
+ ```
+
 ### Parameters specification:
 
 #### run_haproxy_for_postgresql.sh

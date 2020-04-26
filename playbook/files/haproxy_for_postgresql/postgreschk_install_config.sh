@@ -17,7 +17,7 @@ cd /tmp
 cp postgreschk /usr/local/bin/
 chown nobody: /usr/local/bin/postgreschk
 chmod 744 /usr/local/bin/postgreschk
-echo "$server_address:5432:postgres:${user}:${pass}" > /opt/.pgpass
+echo "${pass}" > /opt/.pgpass
 echo "${user}" > /opt/.pguser
 echo "${server_address}" > /opt/.pgserver
 chown nobody: /opt/.pguser /opt/.pgpass /opt/.pgserver
